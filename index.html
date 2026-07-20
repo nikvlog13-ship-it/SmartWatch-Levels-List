@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GD Watch Top — Топ уровней Geometry Dash на часах</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --accent-color: #2fcc71;
+            --accent-hover: #26a65b;
+            --text-color: #f0f6fc;
+            --text-secondary: #a3b1c2;
+            --border-color: #30363d;
+            
+            /* Новая палитра сложностей */
+            --color-green:  #2ecc71; /* Зелёный */
+            --color-blue:   #3498db; /* Синий */
+            --color-yellow: #f1c40f; /* Жёлтый */
+            --color-red:    #e74c3c; /* Красный */
+            --color-purple: #9b59b6; /* Фиолетовый */
+            --color-brown:  #8d6e63; /* Коричневый */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1f2937, var(--card-bg));
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        /* Навигация (Вкладки) */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background-color: var(--card-bg);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-color);
+            border-color: var(--accent-color);
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent-color);
+            color: #000;
+            border-color: var(--accent-color);
+        }
+
+        /* Контейнеры списков */
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* Карточка уровня */
+        .card {
+            background-color: var(--card-bg);
+            background-size: cover;
+            background-position: center;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Градиентный оверлей для читаемости текста */
+        .card-inner {
+            background: linear-gradient(90deg, rgba(13,17,23,0.92) 0%, rgba(22,27,34,0.85) 60%, rgba(22,27,34,0.7) 100%);
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: 50px 1fr auto;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .rank {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .rank-1 { color: #ffd700; }
+        .rank-2 { color: #c0c0c0; }
+        .rank-3 { color: #cd7f32; }
+
+        .card-info h2 {
+            font-size: 1.3rem;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .points-tag {
+            color: #ffd700;
+            font-size: 0.95rem;
+            font-weight: 700;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            color: #fff;
+            text-transform: uppercase;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Зелёный (Easy / Normal) */
+        .badge-normal,
+        .badge-medium-demon { 
+            background-color: var(--color-green); 
+        }
+
+        /* Синий (Hard / Harder) */
+        .badge-easy,
+        .badge-easy-demon { 
+            background-color: var(--color-blue); 
+        }
+
+        /* Жёлтый (Insane) */
+        .badge-hard { 
+            background-color: var(--color-yellow); 
+            color: #000; /* Тёмный текст для лучшей читаемости на жёлтом */
+        }
+
+        /* Красный (Easy / Medium / Hard Demon) */
+        .badge-harder,
+        .badge-hard-demon { 
+            background-color: var(--color-red); 
+        }
+
+        /* Фиолетовый (Insane Demon) */
+        .badge-insane,
+        .badge-insane-demon { 
+            background-color: var(--color-purple); 
+        }
+
+        /* Коричневый (Extreme Demon) */
+        .badge-extreme-demon { 
+            background-color: var(--color-brown); 
+        }
+
+        .card-meta {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+        }
+
+        .card-meta strong {
+            color: var(--text-color);
+        }
+
+        .toggle-icon {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            transition: transform 0.3s ease;
+        }
+
+        .card.open .toggle-icon {
+            transform: rotate(180deg);
+            color: var(--accent-color);
+        }
+
+        /* Выпадающая таблица игроков */
+        .level-details {
+            display: none;
+            background: rgba(13, 17, 23, 0.95);
+            border-top: 1px solid var(--border-color);
+            padding: 15px 20px;
+        }
+
+        .card.open .level-details {
+            display: block;
+        }
+
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        .records-table th, .records-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .records-table th {
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .records-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .records-table tr:hover td {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .proof-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .proof-link:hover {
+            text-decoration: underline;
+            color: var(--accent-hover);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 600px) {
+            .tabs {
+                flex-direction: column;
+            }
+            .card-inner {
+                grid-template-columns: 30px 1fr auto;
+                gap: 10px;
+                padding: 12px 15px;
+            }
+            .records-table th, .records-table td {
+                padding: 8px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>⌚ GD Watch Top</h1>
+        <p>Лучшие достижения Geometry Dash на смарт-часах</p>
+    </header>
+
+    <!-- Переключатели вкладок -->
+    <nav class="tabs">
+        <button class="tab-btn active" onclick="switchTab('completed')">🏆 Пройденный топ</button>
+        <button class="tab-btn" onclick="switchTab('uncompleted')">⏳ Не пройденный топ</button>
+        <button class="tab-btn" onclick="switchTab('players')">👑 Топ игроков</button>
+    </nav>
+
+    <!-- Вкладка 1: Пройденные уровни -->
+    <main class="tab-content active" id="completed-tab"></main>
+
+    <!-- Вкладка 2: Не пройденные уровни -->
+    <main class="tab-content" id="uncompleted-tab"></main>
+
+    <!-- Вкладка 3: Топ игроков -->
+    <main class="tab-content" id="players-tab"></main>
+
+    <footer>
+        <p>GD Watch Records List &bull; Обновлено в 2026 году</p>
+    </footer>
+</div>
+
+<script>
+    // 1. Пройденные уровни
+    const completedLevels = [
+        {
+            id: "3",
+            title: "Theory of Everything",
+            creator: "RobTop",
+            difficulty: "Insane",
+            badgeClass: "badge-insane",
+            points: 35,
+            image: "images/Theory_of_Everything.png",
+            records: [
+                { player: "PrinceDenseGaming", progress: 100, device: "Apple Watch Ultra", proof: "https://www.youtube.com/shorts/GqB4bm1M-yk" },
+            ]
+        },
+        {
+            id: "2",
+            title: "OuterSpace",
+            creator: "Nicki1202",
+            difficulty: "Hard",
+            badgeClass: "badge-hard",
+            points: 23,
+            image: "images/OuterSpace.png",
+            records: [
+                { player: "OrangeBlue", progress: 100, device: "Galaxy Watch 4", proof: "https://www.youtube.com/watch?v=OGahQPxHjvU" },
+            ]
+        },
+        {
+            id: "1",
+            title: "Polargeist",
+            creator: "RobTop",
+            difficulty: "Normal",
+            badgeClass: "badge-normal",
+            points: 20,
+            image: "images/Polargeist.png",
+            records: [
+                { player: "Geomy Dashan FNF", progress: 100, device: "TicWatch Pro 3", proof: "https://www.youtube.com/watch?v=cBYP2n47uTo" },
+                { player: "Elite Tech", progress: 5, device: "Finow Q7", proof: "https://www.youtube.com/watch?v=b6rO0ejiZxM" }
+            ]
+        },
+    ];
+
+    // 2. Не пройденные уровни (есть прогресс)
+    const uncompletedLevels = [
+        {
+            id: "4",
+            title: "Fingerdash",
+            creator: "RobTop",
+            difficulty: "Insane",
+            badgeClass: "badge-insane",
+            points: 45,
+            image: "images/Fingerdash.webp",
+            records: [
+                { player: "Milkshake Interactive Media", progress: 73, device: "Google Pixel Watch", proof: "https://www.youtube.com/watch?v=PzUOpXcEMLM" },
+            ]
+        },
+        {
+            id: "5",
+            title: "Dash",
+            creator: "RobTop",
+            difficulty: "Insane",
+            badgeClass: "badge-insane",
+            points: 43,
+            image: "images/Dash.webp",
+            records: [
+                { player: "PrinceDenseGaming", progress: 28, device: "Apple Watch Ultra", proof: "https://www.youtube.com/shorts/jeadmD45HBM" },
+            ]
+        },
+        {
+            id: "6",
+            title: "Time Machine",
+            creator: "RobTop",
+            difficulty: "Harder",
+            badgeClass: "badge-harder",
+            points: 36,
+            image: "images/Time_Machine.webp",
+            records: [
+                { player: "Elite Tech", progress: 3, device: "Finow Q7", proof: "https://www.youtube.com/watch?v=b6rO0ejiZxM" },
+            ]
+        },
+        {
+            id: "7",
+            title: "Jumper",
+            creator: "RobTop",
+            difficulty: "Harder",
+            badgeClass: "badge-harder",
+            points: 29,
+            image: "images/Jumper.webp",
+            records: [
+                { player: "Elite Tech", progress: 3, device: "Finow Q7", proof: "https://www.youtube.com/watch?v=b6rO0ejiZxM" },
+            ]
+        },
+        {
+            id: "8",
+            title: "Stereo Madness",
+            creator: "RobTop",
+            difficulty: "Easy",
+            badgeClass: "badge-easy",
+            points: 10,
+            image: "images/Stereo_Madness.webp",
+            records: [
+                { player: "_v1rtuS", progress: 63, device: "???", proof: "https://youtube.com" },
+                { player: "Miguelanovix", progress: 60, device: "TAG Heuer Connected", proof: "https://www.youtube.com/watch?v=qLxADLLhwiI" },
+                { player: "GalaxyWatch5", progress: 51, device: "Galaxy Watch 5", proof: "https://www.youtube.com/watch?v=TOWIm01IcDY" },
+                { player: "Elite Tech", progress: 15, device: "Finow Q7", proof: "https://www.youtube.com/watch?v=b6rO0ejiZxM" },
+                { player: "Clibix", progress: 15, device: "Galaxy Watch 5", proof: "https://www.youtube.com/watch?v=Rq8U_B0X9L4" },
+            ]
+        },
+        {
+            id: "9",
+            title: "Back on Track",
+            creator: "RobTop",
+            difficulty: "Easy",
+            badgeClass: "badge-easy",
+            points: 9,
+            image: "images/Back_on_Track.png",
+            records: [
+                { player: "Clibix", progress: 12, device: "Galaxy Watch 5", proof: "https://www.youtube.com/watch?v=Rq8U_B0X9L4" },
+                { player: "MonsterDroiid", progress: 3, device: "K9 Review", proof: "https://www.youtube.com/watch?v=SwNbAigrmQI" },
+            ]
+        },
+    ];
+
+    // 3. Топ игроков
+    const players = [
+        { name: "PrinceDenseGaming", points: 35, topBeat: "Theory of Everything", device: "Apple Watch Ultra" },
+        { name: "OrangeBlue", points: 23, topBeat: "OuterSpace", device: "Galaxy Watch 4" },
+        { name: "Geomy Dashan FNF", points: 20, topBeat: "Polargeist", device: "TicWatch Pro 3" },
+        { name: "Milkshake Interactive Media", points: 18, topBeat: "Fingerdash 73%", device: "Google Pixel Watch" },
+        { name: "_v1rtus", points: 3, topBeat: "Stereo Madness 63%", device: "???" },
+        { name: "Miguelanovix", points: 3, topBeat: "Stereo Madness 60%", device: "TAG Heuer Connected" },
+        { name: "GalaxyWatch5", points: 2, topBeat: "Stereo Madness 51%", device: "Galaxy Watch 5" },
+    ];
+
+    function getRankClass(rank) {
+        if (rank === 1) return 'rank-1';
+        if (rank === 2) return 'rank-2';
+        if (rank === 3) return 'rank-3';
+        return '';
+    }
+
+    // Переключение карточки уровня (разворачивание таблицы)
+    function toggleCard(cardElement, event) {
+        // Если кликнули по самой ссылке "Proof", не сворачиваем карточку
+        if (event.target.tagName === 'A') return;
+        cardElement.classList.toggle('open');
+    }
+
+    // Генерация таблицы рекордов для уровня
+    function renderRecordsTable(records, maxPoints) {
+        return `
+            <div class="level-details">
+                <table class="records-table">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Игрок</th>
+                            <th>Прогресс</th>
+                            <th>Очки</th>
+                            <th>Пруф</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${records.map((rec, index) => {
+                            // Очки за прогресс (рассчитываются от максимальных очков уровня)
+                            let fraction = 0;
+
+                            if (rec.progress >= 100) {
+                                fraction = 1;      // 100% -> 10/10 очков (все балы)
+                            } else if (rec.progress >= 95) {
+                                fraction = 0.7;    // 95-99% -> 7/10 pts
+                            } else if (rec.progress >= 85) {
+                                fraction = 0.6;    // 85-94% -> 6/10 pts
+                            } else if (rec.progress >= 75) {
+                                fraction = 0.5;    // 75-84% -> 5/10 pts
+                            } else if (rec.progress >= 65) {
+                                fraction = 0.4;    // 65-74% -> 4/10 pts
+                            } else if (rec.progress >= 55) {
+                                fraction = 0.3;    // 55-64% -> 3/10 pts
+                            } else if (rec.progress >= 45) {
+                                fraction = 0.2;    // 45-54% -> 2/10 pts
+                            } else if (rec.progress >= 35) {
+                                fraction = 0.1;    // 35-44% -> 1/10 pts
+                            } else {
+                                fraction = 0;      // 0-34% -> 0 pts
+                            }
+
+                            const earnedPoints = Math.round(maxPoints * fraction);
+                            return `
+                                <tr>
+                                    <td><strong>#${index + 1}</strong></td>
+                                    <td>${rec.player} <span style="font-size: 0.75rem; color: var(--text-secondary);">(${rec.device})</span></td>
+                                    <td><strong>${rec.progress}%</strong></td>
+                                    <td><span style="color: #ffd700;">+${earnedPoints} pts</span></td>
+                                    <td><a href="${rec.proof}" target="_blank" rel="noopener" class="proof-link">▶ Proof</a></td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    // Отрисовка пройденных уровней
+    function renderCompleted() {
+        const container = document.getElementById('completed-tab');
+        container.innerHTML = completedLevels.map((lvl, index) => {
+            const rank = index + 1;
+            return `
+                <div class="card" style="background-image: url('${lvl.image}');" onclick="toggleCard(this, event)">
+                    <div class="card-inner">
+                        <div class="rank ${getRankClass(rank)}">#${rank}</div>
+                        <div class="card-info">
+                            <h2>
+                                ${lvl.title} 
+                                <span class="badge ${lvl.badgeClass}">${lvl.difficulty}</span>
+                                <span class="points-tag">💎 ${lvl.points} pts</span>
+                            </h2>
+                            <div class="card-meta">
+                                <span>by <strong>${lvl.creator}</strong></span>
+                                <span>👥 Прогрессы: <strong>${lvl.records.length}</strong></span>
+                            </div>
+                        </div>
+                        <div class="toggle-icon">▼</div>
+                    </div>
+                    ${renderRecordsTable(lvl.records, lvl.points)}
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Отрисовка не пройденных уровней
+    function renderUncompleted() {
+        const container = document.getElementById('uncompleted-tab');
+        container.innerHTML = uncompletedLevels.map((lvl, index) => {
+            const rank = index + 1;
+            // Максимальный прогресс среди всех игроков
+            const bestProgress = Math.max(...lvl.records.map(r => r.progress));
+
+            return `
+                <div class="card" style="background-image: url('${lvl.image}');" onclick="toggleCard(this, event)">
+                    <div class="card-inner">
+                        <div class="rank ${getRankClass(rank)}">#${rank}</div>
+                        <div class="card-info">
+                            <h2>
+                                ${lvl.title} 
+                                <span class="badge ${lvl.badgeClass}">${lvl.difficulty}</span>
+                                <span class="points-tag">💎 ${lvl.points} pts</span>
+                            </h2>
+                            <div class="card-meta">
+                                <span>by <strong>${lvl.creator}</strong></span>
+                                <span>📊 Лучший прогресс: <strong>${bestProgress}%</strong></span>
+                            </div>
+                        </div>
+                        <div class="toggle-icon">▼</div>
+                    </div>
+                    ${renderRecordsTable(lvl.records, lvl.points)}
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Отрисовка топа игроков
+    function renderPlayers() {
+        const container = document.getElementById('players-tab');
+        container.innerHTML = players.map((player, index) => {
+            const rank = index + 1;
+            return `
+                <div class="card" style="cursor: default;">
+                    <div class="card-inner">
+                        <div class="rank ${getRankClass(rank)}">#${rank}</div>
+                        <div class="card-info">
+                            <h2>${player.name}</h2>
+                            <div class="card-meta">
+                                <span>🏆 Очки: <strong style="color: #ffd700;">${player.points} pts</strong></span>
+                                <span>🥇 Топ прохождение: <strong>${player.topBeat}</strong></span>
+                                <span class="device-tag">⌚ ${player.device}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+        if (tabName === 'completed') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('completed-tab').classList.add('active');
+        } else if (tabName === 'uncompleted') {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('uncompleted-tab').classList.add('active');
+        } else if (tabName === 'players') {
+            document.querySelectorAll('.tab-btn')[2].classList.add('active');
+            document.getElementById('players-tab').classList.add('active');
+        }
+    }
+
+    renderCompleted();
+    renderUncompleted();
+    renderPlayers();
+</script>
+
+</body>
+</html>
